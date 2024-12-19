@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Solver</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        td {
+            width: 33px;
+            height: 33px;
+            text-align: center;
+            border: 1px solid #ccc;
+            font-size: 18px;
+        }
+        input {
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            font-size: 18px;
+            border: none;
+            outline: none;
+        }
+        .button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Sudoku Solver</h1>
+    <form id="sudokuForm">
+        <table id="sudokuBoard">
+            <!-- Rows will be inserted here by JavaScript -->
+        </table>
+        <button type="button" class="button" onclick="solveSudoku()">Solve Sudoku</button>
+    </form>
+</div>
+
+<script>
+    function createBoard() {
+        const board = document.getElementById('sudokuBoard');
+        for (let i = 0; i < 9; i++) {
+            const row = document.createElement('tr');
+            for (let j = 0; j < 9; j++) {
+                const cell = document.createElement('td');
+                const input = document.createElement('input');
+                input.setAttribute('type', 'number');
+                input.setAttribute('min', '0');
+                input.setAttribute('max', '9');
+                input.setAttribute('value', '0');
+                cell.appendChild(input);
+                row.appendChild(cell);
+            }
+            board.appendChild(row);
+        }
+    }
+
+    function solveSudoku() {
+        const board = [];
+        const rows = document.querySelectorAll('#sudokuBoard tr');
+        rows.forEach(row => {
+            const rowData = [];
+            row.querySelectorAll('input').forEach(input => {
+                rowData.push(parseInt(input.value, 10));
+            });
+            board.push(rowData);
+        });
+
+        if (solveSudokuUtil(board, 0, 0)) {
+            displayBoard(board);
+        } else {
+            alert('No solution exists');
+        }
+    }
+
+    function isSafe(board, row, col, num) {
+        for (let x = 0; x < 9; x++) {
+            if (board[row][x] === num || board[x][col] === num) {
+                return false;
+            }
+        }
+
+        const startRow = row - row % 3;
+        const startCol = col - col % 3;
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (board[i + startRow][j + startCol] === num) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    function solveSudokuUtil(board, row, col) {
+        if (row === 9 - 1 && col === 9) {
+            return true;
+        }
+
+        if (col === 9) {
+            row++;
+            col = 0;
+        }
+
+        if (board[row][col] !== 0) {
+            return solveSudokuUtil(board, row, col + 1);
+        }
+
+        for (let num = 1; num <= 9; num++) {
+            if (isSafe(board, row, col, num)) {
+                board[row][col] = num;
+                if (solveSudokuUtil(board, row, col + 1)) {
+                    return true;
+                }
+                board[row][col] = 0;
+            }
+        }
+
+        return false;
+    }
+
+    function displayBoard(board) {
+        const rows = document.querySelectorAll('#sudokuBoard tr');
+        for (let i = 0; i < 9; i++) {
+            const cells = rows[i].querySelectorAll('input');
+            for (let j = 0; j < 9; j++) {
+                cells[j].value = board[i][j];
+            }
+        }
+    }
+
+    window.onload = createBoard;
+</script>
+
+</body>
+</html>
